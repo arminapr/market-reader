@@ -1,16 +1,67 @@
 import pandas as pd
+from sklearn.model_selection import train_test_split
+from transformers import BertTokenizer, BertForSequenceClassification, TrainingArguments, Trainer
+from datasets import Dataset, DatasetDict
 
-column_names1 = ['sentiment', 'text']
-dataset1 = pd.read_csv('./datasets/finance_dataset1.csv', names=column_names1, encoding='latin1')
-dataset2 = pd.read_csv('./datasets/finance_dataset2.csv', encoding='latin1')
-dataset3 = pd.read_csv('./datasets/finance_dataset3.csv', encoding='latin1')
+dataset = pd.read_csv('./datasets/combined_dataset.csv')
 
-# clean up the data to have the same columns and values before combining
-dataset2 = dataset2.rename(columns={'Full_text': 'text', 'Final Status': 'sentiment'})[['text', 'sentiment']]
-dataset3 = dataset3.rename(columns={'Sentence': 'text', 'Sentiment': 'sentiment'})[['text', 'sentiment']]
+sentiment_mapping = {'neutral': 0, 'negative': 1, 'positive': 2}
+dataset['sentiment'] = dataset['sentiment'].map(sentiment_mapping)
 
-# dataset2 has capitalized values in label and has an extra space in some values
-dataset2['sentiment'] = dataset2['sentiment'].str.lower().str.strip()
+# define X (text) and y (sentiment)
+y = list(dataset['sentiment'])
+X = list(dataset['text'])
 
-combined_dataset = pd.concat([dataset1[['text', 'sentiment']], dataset2, dataset3], ignore_index=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
 
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+
+# tokenize the texts
+def tokenize_function(texts):
+    return tokenizer(texts, padding="max_length", truncation=True, max_length=512)
+
+train_encodings = tokenizer(X_train)
+test_encodings = tokenizer(X_test)
+
+# make the datasets compatible with hugging face
+train_dataset = Dataset.from_dict({'text': X_train, 'label': y_train})
+test_dataset = Dataset.from_dict({'text': X_test, 'label': y_test})
+
+# tokenize the datasets
+train_dataset = train_dataset.map(lambda e: tokenizer(e['text'], padding="max_length", truncation=True, max_length=512), batched=True)
+test_dataset = test_dataset.map(lambda e: tokenizer(e['text'], padding="max_length", truncation=True, max_length=512), batched=True)
+
+# fix the formats for PyTorch
+train_dataset.set_format(type='torch', columns=['input_ids', 'attention_mask', 'label'])
+test_dataset.set_format(type='torch', columns=['input_ids', 'attention_mask', 'label'])
+
+# bert model initiation
+model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=3)
+
+# set training arguments, play around with this
+training_args = TrainingArguments(
+    output_dir='./results',
+    num_train_epochs=10,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
+    warmup_steps=500,
+    weight_decay=0.01,
+    logging_dir='./logs',
+    logging_steps=10,
+    eval_strategy="epoch"
+)
+
+# provides us with gradient descent and loss functions automatically
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=train_dataset,
+    eval_dataset=test_dataset,
+    tokenizer=tokenizer
+)
+
+# Train the model
+trainer.train()
+
+# Evaluate the model
+trainer.evaluate()
