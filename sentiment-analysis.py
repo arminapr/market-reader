@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from transformers import BertTokenizer, BertForSequenceClassification, TrainingArguments, Trainer
-from datasets import Dataset, DatasetDict
+from datasets import Dataset
 
 dataset = pd.read_csv('./datasets/combined_dataset.csv')
 
@@ -14,6 +14,7 @@ X = list(dataset['text'])
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
 
+# https://huggingface.co/docs/transformers/en/model_doc/bert
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
 # tokenize the texts
@@ -27,7 +28,7 @@ test_encodings = tokenizer(X_test)
 train_dataset = Dataset.from_dict({'text': X_train, 'label': y_train})
 test_dataset = Dataset.from_dict({'text': X_test, 'label': y_test})
 
-# tokenize the datasets
+# tokenize the dataset text values
 train_dataset = train_dataset.map(lambda e: tokenizer(e['text'], padding="max_length", truncation=True, max_length=512), batched=True)
 test_dataset = test_dataset.map(lambda e: tokenizer(e['text'], padding="max_length", truncation=True, max_length=512), batched=True)
 
@@ -38,6 +39,7 @@ test_dataset.set_format(type='torch', columns=['input_ids', 'attention_mask', 'l
 # bert model initiation
 model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=3)
 
+# https://huggingface.co/transformers/v4.4.2/main_classes/trainer.html#trainingarguments 
 # set training arguments, play around with this
 training_args = TrainingArguments(
     output_dir='./results',
@@ -48,9 +50,12 @@ training_args = TrainingArguments(
     weight_decay=0.01,
     logging_dir='./logs',
     logging_steps=10,
-    eval_strategy="epoch"
+    eval_strategy="epoch",
+    save_steps=300,
+    save_total_limit=3
 )
 
+# https://huggingface.co/transformers/v4.4.2/main_classes/trainer.html 
 # provides us with gradient descent and loss functions automatically
 trainer = Trainer(
     model=model,
