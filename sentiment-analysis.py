@@ -48,7 +48,9 @@ training_args = TrainingArguments(
     weight_decay=0.01,
     logging_dir='./logs',
     logging_steps=10,
-    eval_strategy="epoch"
+    eval_strategy="epoch",
+    save_steps=1000,
+    save_total_limit=3
 )
 
 # provides us with gradient descent and loss functions automatically
