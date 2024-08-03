@@ -12,7 +12,7 @@ dataset['sentiment'] = dataset['sentiment'].map(sentiment_mapping)
 y = list(dataset['sentiment'])
 X = list(dataset['text'])
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=123)
 
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
@@ -26,6 +26,9 @@ test_encodings = tokenizer(X_test)
 # make the datasets compatible with hugging face
 train_dataset = Dataset.from_dict({'text': X_train, 'label': y_train})
 test_dataset = Dataset.from_dict({'text': X_test, 'label': y_test})
+
+train_dataset.to_csv('./datasets/train_data.csv', index=False)
+test_dataset.to_csv('./datasets/test_data.csv', index=False)
 
 # tokenize the datasets
 train_dataset = train_dataset.map(lambda e: tokenizer(e['text'], padding="max_length", truncation=True, max_length=512), batched=True)
@@ -41,7 +44,7 @@ model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_l
 # set training arguments, play around with this
 training_args = TrainingArguments(
     output_dir='./results',
-    num_train_epochs=10,
+    num_train_epochs=3,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=16,
     warmup_steps=500,
@@ -49,8 +52,9 @@ training_args = TrainingArguments(
     logging_dir='./logs',
     logging_steps=10,
     eval_strategy="epoch",
-    save_steps=1000,
-    save_total_limit=3
+    save_steps=25,
+    save_total_limit=3,
+    max_grad_norm=1.0
 )
 
 # provides us with gradient descent and loss functions automatically
@@ -65,5 +69,5 @@ trainer = Trainer(
 # Train the model
 trainer.train()
 
-# Evaluate the model
-trainer.evaluate()
+# # Evaluate the model
+# trainer.evaluate()
