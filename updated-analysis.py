@@ -18,13 +18,6 @@ dataset['sentiment'] = dataset['sentiment'].map(sentiment_mapping)
 y = list(dataset['sentiment'])
 X = list(dataset['text'])
 
-# hf_dataset = Dataset.from_pandas(dataset)
-# split_dataset = hf_dataset.train_test_split(test_size=0.4, seed=12)
-# dataset_dict = DatasetDict({
-#     'train': split_dataset['train'],
-#     'test': split_dataset['test']
-# })
-
 # print(dataset)
 print("loading a pre-trained BERT model")
 model_id = "bert-base-uncased"
@@ -89,7 +82,7 @@ def evaluate(model, dataloader, device):
             correct += (predictions == labels).sum().item()
     return total_loss / len(dataloader), correct / len(dataloader.dataset)
 
-# Training loop
+# training loop
 for epoch in range(num_epochs):
     print("training starts here")
     epoch_start_time = time.time()
@@ -99,3 +92,10 @@ for epoch in range(num_epochs):
     epoch_end_time = time.time()
     epoch_duration = epoch_end_time - epoch_start_time
     print(f"Epoch {epoch + 1}/{num_epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}, Time: {epoch_duration:.2f}s")
+
+model_save_path = "./saved_model"
+tokenizer_save_path = "./saved_tokenizer"
+
+# save the model and tokenizer
+model.save_pretrained(model_save_path)
+tokenizer.save_pretrained(tokenizer_save_path)
