@@ -3,7 +3,7 @@ import pandas as pd
 from transformers import BertTokenizerFast, BertForSequenceClassification, AdamW, get_scheduler
 from torch.utils.data import DataLoader, TensorDataset, random_split
 from tqdm.auto import tqdm
-import time
+import pickle
 
 device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
 print(f"Using device: {device}")
@@ -52,11 +52,12 @@ lr_scheduler = get_scheduler(
 )
 
 print("training starting")
-# Training and evaluation functions
+# training and evaluation functions
 def train_epoch(model, dataloader, optimizer, device):
     print("training")
     model.train()
     total_loss = 0
+    correct = 0
     for batch in tqdm(dataloader):
         input_ids, attention_mask, labels = [b.to(device) for b in batch]
         optimizer.zero_grad()
@@ -65,7 +66,10 @@ def train_epoch(model, dataloader, optimizer, device):
         loss.backward()
         optimizer.step()
         total_loss += loss.item()
-    return total_loss / len(dataloader)
+        predictions = outputs.logits.argmax(dim=-1)
+        correct += (predictions == labels).sum().item()
+    accuracy = correct / len(dataloader.dataset)
+    return total_loss / len(dataloader), accuracy
 
 def evaluate(model, dataloader, device):
     print("evaluating")
@@ -82,16 +86,23 @@ def evaluate(model, dataloader, device):
             correct += (predictions == labels).sum().item()
     return total_loss / len(dataloader), correct / len(dataloader.dataset)
 
+# lists to store the values
+train_losses = []
+train_accuracies = []
+val_losses = []
+val_accuracies = []
+
 # training loop
 for epoch in range(num_epochs):
-    print("training starts here")
-    epoch_start_time = time.time()
-    
-    train_loss = train_epoch(model, train_loader, optimizer, device)
+    train_loss, train_accuracy = train_epoch(model, train_loader, optimizer, device)
     val_loss, val_accuracy = evaluate(model, test_loader, device)
-    epoch_end_time = time.time()
-    epoch_duration = epoch_end_time - epoch_start_time
-    print(f"Epoch {epoch + 1}/{num_epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}, Time: {epoch_duration:.2f}s")
+    
+    # append the losses/accuracy to the lists
+    train_losses.append(train_loss)
+    train_accuracies.append(train_accuracy)
+    val_losses.append(val_loss)
+    val_accuracies.append(val_accuracy)
+    print(f"Epoch {epoch + 1}/{num_epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}")
 
 model_save_path = "./saved_model"
 tokenizer_save_path = "./saved_tokenizer"
@@ -99,3 +110,13 @@ tokenizer_save_path = "./saved_tokenizer"
 # save the model and tokenizer
 model.save_pretrained(model_save_path)
 tokenizer.save_pretrained(tokenizer_save_path)
+
+# save the training and validation losses and accuracies
+metrics_save_path = "./training_metrics.pkl"
+with open(metrics_save_path, 'wb') as f:
+    pickle.dump({
+        'train_losses': train_losses,
+        'train_accuracies': train_accuracies,
+        'val_losses': val_losses,
+        'val_accuracies': val_accuracies
+    }, f)
