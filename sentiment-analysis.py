@@ -102,6 +102,10 @@ for epoch in range(num_epochs):
     train_accuracies.append(train_accuracy)
     val_losses.append(val_loss)
     val_accuracies.append(val_accuracy)
+    print("Train Losses:", train_losses)
+    print("Train Accuracies:", train_accuracies)
+    print("Validation Losses:", val_losses)
+    print("Validation Accuracies:", val_accuracies)
     print(f"Epoch {epoch + 1}/{num_epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}")
 
 model_save_path = "./saved_model"
