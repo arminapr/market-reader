@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            margin-top: 0;
+        }
+
+        #text-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #3e8e41;
+        }
+
+        #news {
+            margin-top: 20px;
+        }
+
+        .headline {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .headline strong {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sentiment Analysis</h1>
+    <div class="container">
+        <div class="section">
+            <h2>Analyze Text</h2>
+            <textarea id="text-input" rows="4" cols="50"></textarea>
+            <button onclick="analyzeText()">Analyze</button>
+            <p id="text-sentiment"></p>
+        </div>
+        <div class="section">
+            <h2>Yahoo Finance News</h2>
+            <button onclick="fetchNews()">Fetch News</button>
+            <div id="news"></div>
+        </div>
+    </div>
+
+    <script>
+        async function analyzeText() {
+            const text = document.getElementById('text-input').value;
+            const response = await fetch('http://127.0.0.1:5000/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            });
+            const result = await response.json();
+            document.getElementById('text-sentiment').innerText = `Sentiment: ${result.sentiment}`;
+        }
+
+        async function fetchNews() {
+            const response = await fetch('http://127.0.0.1:5000/scrape');
+            const result = await response.json();
+            const newsDiv = document.getElementById('news');
+            newsDiv.innerHTML = '';
+            result.headlines.forEach(item => {
+                const headlineDiv = document.createElement('div');
+                headlineDiv.className = 'headline';
+                headlineDiv.innerHTML = `<strong>Headline:</strong> ${item.headline} <br> <strong>Sentiment:</strong> ${item.sentiment}`;
+                newsDiv.appendChild(headlineDiv);
+            });
+        }
+    </script>
+</body>
+</html>
