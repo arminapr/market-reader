@@ -10,8 +10,8 @@ CORS(app)
 
 device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
 
-model_save_path = "./saved_model"
-tokenizer_save_path = "./saved_tokenizer"
+model_save_path = "./saved_model2"
+tokenizer_save_path = "./saved_tokenizer2"
 
 model = BertForSequenceClassification.from_pretrained(model_save_path).to(device)
 tokenizer = BertTokenizerFast.from_pretrained(tokenizer_save_path)
