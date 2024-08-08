@@ -1,7 +1,7 @@
 import pickle
 import matplotlib.pyplot as plt
 
-metrics_save_path = "./training_metrics.pkl"
+metrics_save_path = 'training_metrics.pkl'
 with open(metrics_save_path, 'rb') as f:
     metrics = pickle.load(f)
 
@@ -10,26 +10,22 @@ train_accuracies = metrics['train_accuracies']
 val_losses = metrics['val_losses']
 val_accuracies = metrics['val_accuracies']
 
-# plot the metrics
-epochs = range(1, len(train_losses) + 1)
-
-plt.figure(figsize=(12, 5))
-
-plt.subplot(1, 2, 1)
-plt.plot(epochs, train_losses, label='Train Loss')
-plt.plot(epochs, val_losses, label='Val Loss')
+# plot for losses
+plt.figure(figsize=(10, 5))
+plt.plot(train_losses, label='Training Loss')
+plt.plot(val_losses, label='Validation Loss')
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
+plt.title('Training and Validation Loss')
 plt.legend()
-plt.title('Train and Validation Loss')
+plt.show()
 
-plt.subplot(1, 2, 2)
-plt.plot(epochs, train_losses, label='Train Accuracy')
-plt.plot(epochs, val_accuracies, label='Val Accuracy')
+# plot for accuracies
+plt.figure(figsize=(10, 5))
+plt.plot(train_accuracies, label='Training Accuracy')
+plt.plot(val_accuracies, label='Validation Accuracy')
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy')
+plt.title('Training and Validation Accuracy')
 plt.legend()
-plt.title('Train and Validation Accuracy')
-
-plt.tight_layout()
 plt.show()
