@@ -45,7 +45,7 @@ model = BertForSequenceClassification.from_pretrained(model_id, num_labels=3).to
 print("defining optimizer")
 # define optimizer and scheduler
 optimizer = AdamW(model.parameters(), lr=2e-5)
-num_epochs = 3
+num_epochs = 10
 num_training_steps = num_epochs * len(train_loader)
 lr_scheduler = get_scheduler(
     name="linear", optimizer=optimizer, num_warmup_steps=0, num_training_steps=num_training_steps
