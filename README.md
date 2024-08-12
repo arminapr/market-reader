@@ -43,7 +43,7 @@ Ensure you have the following installed to run the front end application
 - requests
 
 ### Installation
-## Only follow these steps if you wish to run the front end application locally.
+#### Only follow these steps if you wish to run the front end application locally.
 
 1. Clone the repository:
    ```bash
