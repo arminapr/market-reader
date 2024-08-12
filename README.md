@@ -1,7 +1,4 @@
-# market-reader
- Market Reader: Sentiment Analysis on Financial News
-
-# Sentiment Analysis using BERT with Flask API and Yahoo Finance Web Scraping
+#  Market Reader: Sentiment Analysis on Financial News Using BERT
 
 ## Overview
 
