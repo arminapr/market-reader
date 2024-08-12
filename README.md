@@ -28,9 +28,7 @@ This project provides a Flask API that leverages the BERT language model to perf
 - /plots: configured visualization of our model's results
 - /saved_model: config file for the model **(Note: the model is saved on HuggingFace due to GitHub size restrictions)**
 - /saved_tokenizer: tokenizer files for our model
-
-- training_metrics.pkl: Stores the training metrics for the model.
-
+  
 ## Getting Started
 
 ### Prerequisites
