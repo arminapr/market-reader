@@ -1,11 +1,11 @@
-# sentiment-analysis-on-financial-news
- Sentiment Analysis on Financial News
+# market-reader
+ Market Reader: Sentiment Analysis on Financial News
 
 # Sentiment Analysis using BERT with Flask API and Yahoo Finance Web Scraping
 
 ## Overview
 
-This project provides a Flask API that leverages the BERT language model to perform sentiment analysis. Additionally, it features a web scraping component that collects headlines from Yahoo Finance and analyzes their sentiment. If interested in seeing a live website that does the features below, visit the model on HuggingFace at https://huggingface.co/spaces/arminap/sentiment-analysis. The deployed model on HuggingFace utilizes Gradio to deploy a front end application with our trained model.
+This project provides a Flask API that leverages the BERT language model to perform sentiment analysis. Additionally, it features a web scraping component that collects headlines from Yahoo Finance and analyzes their sentiment. If interested in seeing a live website that does the features below, visit the model on HuggingFace [here](https://huggingface.co/spaces/arminap/sentiment-analysis). The deployed model on HuggingFace utilizes Gradio to deploy a front end application with our trained model.
 
 ## Features
 
@@ -18,6 +18,21 @@ This project provides a Flask API that leverages the BERT language model to perf
   - Scrapes headlines from Yahoo Finance using BeautifulSoup.
   - Analyzes the sentiment of each headline using the BERT model.
   - Returns a list of headlines with their corresponding sentiment in JSON format.
+ 
+## Document Overview
+- sentiment-analysis.py: the sentiment analysis model, including training and evaluation
+- app.py: the main application file, responsible for running the sentiment analysis back end
+- index.html: front end of the application
+- dataset-cleaning.py: code for cleaning and preparing the pre-existing darasets
+- plot.py: plotting the visualization of our model's results
+- requirements.txt: project dependenices
+- training_metrics.pkl: training results for loss and accuracy
+- /datasets: raw and combined datasets
+- /plots: configured visualization of our model's results
+- /saved_model: config file for the model **(Note: the model is saved on HuggingFace due to GitHub size restrictions)**
+- /saved_tokenizer: tokenizer files for our model
+
+- training_metrics.pkl: Stores the training metrics for the model.
 
 ## Getting Started
 
