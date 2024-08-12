@@ -5,12 +5,13 @@ from torch.utils.data import DataLoader, TensorDataset, random_split
 from tqdm.auto import tqdm
 import pickle
 
+# initialize the device to use GPU (for mac use)
 device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
 print(f"Using device: {device}")
-BATCH_SIZE = 16
 
 dataset = pd.read_csv('./datasets/combined_dataset.csv')
 
+# map sentiments to numbers for classification purposes
 sentiment_mapping = {'neutral': 0, 'negative': 1, 'positive': 2}
 dataset['sentiment'] = dataset['sentiment'].map(sentiment_mapping)
 
@@ -18,7 +19,6 @@ dataset['sentiment'] = dataset['sentiment'].map(sentiment_mapping)
 y = list(dataset['sentiment'])
 X = list(dataset['text'])
 
-# print(dataset)
 print("loading a pre-trained BERT model")
 model_id = "bert-base-uncased"
 tokenizer = BertTokenizerFast.from_pretrained(model_id)
@@ -30,12 +30,15 @@ input_ids = encodings['input_ids']
 attention_mask = encodings['attention_mask']
 labels = torch.tensor(y)
 
+# split the dataset into a 60% training, 40% testing set
 print("splitting the dataset")
 dataset = TensorDataset(input_ids, attention_mask, labels)
 train_size = int(0.6 * len(dataset))
 test_size = len(dataset) - train_size
 train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
+# use DataLoader to divide the dataset into batches
+BATCH_SIZE = 16
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
@@ -52,7 +55,7 @@ lr_scheduler = get_scheduler(
 )
 
 print("training starting")
-# training and evaluation functions
+# training the model for each epoch
 def train_epoch(model, dataloader, optimizer, device):
     print("training")
     model.train()
@@ -60,17 +63,29 @@ def train_epoch(model, dataloader, optimizer, device):
     correct = 0
     for batch in tqdm(dataloader):
         input_ids, attention_mask, labels = [b.to(device) for b in batch]
+        # reset the gradients of parameters
         optimizer.zero_grad()
+        
+        # forward pass
+        # pass in the ids and masked values to get the logits and loss
         outputs = model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
         loss = outputs.loss
+        
+        # backpropagation
         loss.backward()
+        # adjust the weights based on the loss
         optimizer.step()
+        
+        # compute the training loss 
         total_loss += loss.item()
         predictions = outputs.logits.argmax(dim=-1)
+        
+        # compute the training accuracy
         correct += (predictions == labels).sum().item()
     accuracy = correct / len(dataloader.dataset)
     return total_loss / len(dataloader), accuracy
 
+# evaluate the model 
 def evaluate(model, dataloader, device):
     print("evaluating")
     model.eval()
@@ -81,8 +96,12 @@ def evaluate(model, dataloader, device):
             input_ids, attention_mask, labels = [b.to(device) for b in batch]
             outputs = model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
             loss = outputs.loss
+            
+            # compute validation loss
             total_loss += loss.item()
             predictions = outputs.logits.argmax(dim=-1)
+            
+            # compute validation accuracy
             correct += (predictions == labels).sum().item()
     return total_loss / len(dataloader), correct / len(dataloader.dataset)
 
