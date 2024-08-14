@@ -43,6 +43,7 @@ train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 # using BERT for sequence classification model
+# used hidden_dropout_prob=0.3 in a separate run of the model but the results were relatively the same
 model = BertForSequenceClassification.from_pretrained(model_id, num_labels=3).to(device)
 
 print("defining optimizer")
