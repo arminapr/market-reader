@@ -43,7 +43,8 @@ Ensure you have the following installed to run the front end application
 - requests
 
 ### Installation
-#### Only follow these steps if you wish to run the front end application locally.
+#### Only follow these steps if you wish to run the front end application locally. 
+Note that for this to work, you will need to add the saved model from Hugging Face to the ```saved_model``` folder.
 
 1. Clone the repository:
    ```bash
