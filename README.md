@@ -82,6 +82,7 @@ This project uses the following libraries and resources:
 - [Hugging Face Transformers](https://huggingface.co/transformers) for the BERT model and tokenizer
 - [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/) for web scraping
 - [Yahoo Finance](https://finance.yahoo.com/) for providing the headlines data
+- [Sentiment Analysis with BERT Using Hugging Face](https://medium.com/@manjindersingh_10145/sentiment-analysis-with-bert-using-huggingface-88e99deeec9a)
 
 ## Resources
 
